@@ -1,4 +1,4 @@
-# custom version suitable for evolutionary strategies
+#evorobotpy2 custom version (include self.angle_to_target)
 from robot_bases import XmlBasedRobot, MJCFBasedRobot, URDFBasedRobot
 import numpy as np
 import pybullet
@@ -28,8 +28,6 @@ class WalkerBase(MJCFBasedRobot):
     self.scene.actor_introduce(self)
     self.initial_z = None
     self.angle_to_target = 0
-    self.mystep = 0
-    self.body_minx = 0
 
   def apply_action(self, a):
     assert (np.isfinite(a).all())
@@ -48,11 +46,9 @@ class WalkerBase(MJCFBasedRobot):
     parts_xyz = np.array([p.pose().xyz() for p in self.parts.values()]).flatten()
     self.body_xyz = (parts_xyz[0::3].mean(), parts_xyz[1::3].mean(), body_pose.xyz()[2]
                     )  # torso z is more informative than mean z
+    self.body_real_xyz = body_pose.xyz()
     self.body_rpy = body_pose.rpy()
     z = self.body_xyz[2]
-    # the following two lines compute minx (stefano)
-    bodyxvect = parts_xyz[0::3]
-    self.body_minx = np.min(bodyxvect[0:-1])
     if self.initial_z == None:
       self.initial_z = z
     r, p, yaw = self.body_rpy
@@ -102,7 +98,7 @@ class Hopper(WalkerBase):
   foot_list = ["foot"]
 
   def __init__(self):
-    WalkerBase.__init__(self, "hopper.xml", "torso", action_dim=3, obs_dim=15, power=0.75)   
+    WalkerBase.__init__(self, "hopper.xml", "torso", action_dim=3, obs_dim=15, power=0.75)
 
   def alive_bonus(self, z, pitch):
     return +1 if z > 0.8 and abs(pitch) < 1.0 else -1
@@ -115,7 +111,7 @@ class Walker2D(WalkerBase):
     WalkerBase.__init__(self, "walker2d.xml", "torso", action_dim=6, obs_dim=22, power=0.40)
 
   def alive_bonus(self, z, pitch):
-    return 1 if z > 0.8 and abs(pitch) < 1.0 else -1
+    return +1 if z > 0.8 and abs(pitch) < 1.0 else -1
 
   def robot_specific_reset(self, bullet_client):
     WalkerBase.robot_specific_reset(self, bullet_client)
@@ -126,21 +122,14 @@ class Walker2D(WalkerBase):
 class HalfCheetah(WalkerBase):
   foot_list = ["ffoot", "fshin", "fthigh", "bfoot", "bshin",
                "bthigh"]  # track these contacts with ground
-  #print("PyBullet HalfCheetah: bonus 1, terminates if z <= 0.3 or picth < 1.0 or knees in contact with the ground")
-
 
   def __init__(self):
     WalkerBase.__init__(self, "half_cheetah.xml", "torso", action_dim=6, obs_dim=26, power=0.90)
 
   def alive_bonus(self, z, pitch):
     # Use contact other than feet to terminate episode: due to a lot of strange walks using knees
-    # Added z < 0.3 as termination condition
-    if (z < 0.3 or np.abs(pitch) > 1.0 or self.feet_contact[1] > 0 or self.feet_contact[
-        2] > 0 or self.feet_contact[4] > 0 or self.feet_contact[5] > 0):
-        value = -1
-    else:
-        value = 0
-    return(value)
+    return +1 if np.abs(pitch) < 1.0 and not self.feet_contact[1] and not self.feet_contact[
+        2] and not self.feet_contact[4] and not self.feet_contact[5] else -1
 
   def robot_specific_reset(self, bullet_client):
     WalkerBase.robot_specific_reset(self, bullet_client)
@@ -165,7 +154,6 @@ class Ant(WalkerBase):
 class Humanoid(WalkerBase):
   self_collision = True
   foot_list = ["right_foot", "left_foot"]  # "left_hand", "right_hand"
-  #print("PYBullet Humanoid: bonus = 1.5, initial joint range [-0.03, 0.03]")
 
   def __init__(self):
     WalkerBase.__init__(self,
@@ -177,20 +165,7 @@ class Humanoid(WalkerBase):
     # 17 joints, 4 of them important for walking (hip, knee), others may as well be turned off, 17/4 = 4.25
 
   def robot_specific_reset(self, bullet_client):
-
-    # custom version for evolutionary strategies
-    # initial joint position vary in the range [-0.03, 0.03] to avoid body-body collisions
-    self._p = bullet_client
-    for j in self.ordered_joints:
-      j.reset_current_position(self.np_random.uniform(low=-0.03, high=0.03), 0)
-
-    self.feet = [self.parts[f] for f in self.foot_list]
-    self.feet_contact = np.array([0.0 for f in self.foot_list], dtype=np.float32)
-    self.scene.actor_introduce(self)
-    self.initial_z = None
-    self.angle_to_target = 0
-    self.mystep = 0
-    
+    WalkerBase.robot_specific_reset(self, bullet_client)
     self.motor_names = ["abdomen_z", "abdomen_y", "abdomen_x"]
     self.motor_power = [100, 100, 100]
     self.motor_names += ["right_hip_x", "right_hip_z", "right_hip_y", "right_knee"]
@@ -233,8 +208,7 @@ class Humanoid(WalkerBase):
       m.set_motor_torque(float(force_gain * power * self.power * np.clip(a[i], -1, +1)))
 
   def alive_bonus(self, z, pitch):
-    # bonus is reduced to 1.5 from 2.0
-    return +1.5 if z > 0.78 else -1  # 2 here because 17 joints produce a lot of electricity cost just from policy noise, living must be better than dying
+    return +2 if z > 0.78 else -1  # 2 here because 17 joints produce a lot of electricity cost just from policy noise, living must be better than dying
 
 
 def get_cube(_p, x, y, z):
