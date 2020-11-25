@@ -64,8 +64,13 @@ class Policy(object):
             self.normvector = None
         # Initialize the neural network
         self.nn = net.PyEvonet(self.nrobots, self.heterogeneous, self.ninputs, (self.nhiddens * self.nlayers), self.noutputs, self.nlayers, self.nhiddens2, self.bias, self.architecture, self.afunction, self.out_type, self.winit, self.clip, self.normalize, self.action_noise, self.action_noise_range, self.wrange, self.nbins, self.low, self.high)
-        # Initialize policy parameters
+        # Initialize policy parameters (control and eventually morphological)
         self.nparams = self.nn.computeParameters()
+        try:
+            self.nmorphparams = self.env.getNumParams()
+            self.nparams += self.nmorphparams
+        except:
+            self.nmorphparams = 0
         self.params = np.arange(self.nparams, dtype=np.float64)
         self.normphase = 0     # whether we collect data to update normalization in the current episode
         self.norm_prob = 0.01  # the fraction of episodes in which normalization data is collected           
@@ -76,8 +81,12 @@ class Policy(object):
         if (self.normalize == 1):           # pass the pointer to the nornalization vector to evonet
             self.nn.copyNormalization(self.normvector)
         self.nn.seed(self.seed)             # initilaize the seed of evonet
-        self.nn.initWeights()               # call the evonet function that initialize the parameters
-
+        self.nn.initWeights()               # initialize the control parameters of evonet 
+        if self.nmorphparams > 0:           # initialize the morphological parameter to 0, if any
+            for i in range(self.nmorphparams):
+                self.params[(self.nparams - self.nmorphparams + i)] = 0.0
+            self.env.setParams(self.params[-self.nmorphparams:])
+         
     def reset(self):
         self.nn.seed(self.seed)             # set the seed of evonet
         self.nn.initWeights()               # call the evonet function that initialize the parameters
