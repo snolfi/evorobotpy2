@@ -100,6 +100,8 @@ class Policy(object):
     def set_trainable_flat(self, x):        
         self.params = np.copy(x)
         self.nn.copyGenotype(self.params)   # copy a vector of parameters in the evonet parameter vector
+        if self.nmorphparams > 0:
+            self.env.setParams(self.params[-self.nmorphparams:]) # set the morphology with the morphological parameters
 
     def get_trainable_flat(self):
         return self.params                  # return the evonet vector of parameters
