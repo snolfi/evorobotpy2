@@ -77,7 +77,10 @@ class EvoAlgo(object):
     def updateBestg(self, fit, ind): # checks whether this is the best postevaluated agent so far and eventually store it
         if fit > self.bestgfit:
             self.bestgfit = fit
-            self.bestgsol = np.copy(ind)  # assume that ind already include the normalization vector (if normalize==1)
+            if (self.policy.normalize == 0):
+                self.bestgsol = np.copy(ind)
+            else:
+                self.bestgsol = np.append(ind,self.policy.normvector)
                        
     def save(self):                  # save the best agent so far, the best postevaluated agent so far, and the statistical data
             print('save data')
