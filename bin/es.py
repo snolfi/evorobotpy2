@@ -66,7 +66,7 @@ def helper():
     print("The .ini file contains the following [EXP], [POLICY] and [ALGO] parameters:")
     print("[EXP]")
     print("environment [string]      : environment (default 'CartPole-v0'")
-    print("algo [string]             : adaptive algorithm (default 'Salimans') CMAES, xNES, sNES, pepg, SSS, coevo2" )
+    print("algo [string]             : adaptive algorithm (default 'OpenAI-ES'), SSS, coevo, coevo2" )
     print("[POLICY]")
     print("nrobots [integer]         : number of robots (default 1)")
     print("heterogeneous [integer]   : whether robots are heterogeneous (default 0)")
