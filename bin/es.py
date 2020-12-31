@@ -81,7 +81,7 @@ def helper():
     print("architecture [0/1/2/3]    : network architecture 0=feedforward 1=recurrent 2=fullrecurrent 3=lstm recurrent (default 0)")
     print("afunction [1/2/3]         : the activation function of neurons 1=logistic 2=tanh 3=linear (default 2)")
     print("winit [0/1/2]             : weight initialization 0=xavier 1=norm incoming 2=uniform (default 0)")
-    print("action_noise [0/1/2]      : action noise 0=none, 1=gaussian 2=gaussian-parametric (default 0)")
+    print("action_noise [0/1/2]      : action noise 0=none, 1=gaussian 2=diagonal gaussian (default 0)")
     print("action_noise_range        : action noise range (default 0.01)")   
     print("normalized [0/1]          : whether or not the input observations are normalized (default 1)")
     print("clip [0/1]                : whether we clip observation in [-5,5] (default 0)")
