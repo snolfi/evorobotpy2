@@ -68,7 +68,7 @@ def rollout(env, net, nepisodes): # carry on the evaluation episodes and store d
 
 
 def filter_rollout(rolldata, percentile): # filter out the data of the worse episode
-    rewards = list(map(lambda s: s.reward, batch))     # extracts the list of comulative rewards collected in the corresponding episodes
+    rewards = list(map(lambda s: s.reward, rolldata))     # extracts the list of comulative rewards collected in the corresponding episodes
     reward_bound = np.percentile(rewards, percentile)  # computes the minimum reward which episodes should have to be used for training the policy network
     reward_mean = float(np.mean(rewards))              # computes the reward mean
 
