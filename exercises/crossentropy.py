@@ -55,9 +55,9 @@ def rollout(env, net, nepisodes): # carry on the evaluation episodes and store d
         action = np.random.choice(len(act_probs), p=act_probs)              # choses the action randomly by using the action probabilities
         next_obs, reward, is_done, _ = env.step(action)                     # perform a step
         episode_reward += reward                                            # update the total undiscounted reward
-        episode_steps.append(EpisodeStep(observation=obs, action=action))   # append the observation and the action to the batch
+        episode_steps.append(EpisodeStep(observation=obs, action=action))   # append the observation and the action to the data
         if is_done:                                                         # at the end of the episode:
-            rolldata.append(Episode(reward=episode_reward, steps=episode_steps))   # create the episode batch which the contain the summed undiscounted reward and the list of observation and actions
+            rolldata.append(Episode(reward=episode_reward, steps=episode_steps))   # create the data of the episode, i.e. the summed undiscounted reward and the list of observation and actions
             episode_reward = 0.0                                                # re-initialize the reward
             episode_steps = []                                                  # re-initialize the steps
             next_obs = env.reset()                                              # re-initialize the episode
@@ -98,8 +98,8 @@ if __name__ == "__main__":
     optimizer = optim.Adam(params=net.parameters(), lr=0.01) # initialize the Adap stochastic optimizer
     print("")
 
-    for iter_no, batch in enumerate(rollout(env, net, NEPISODES)):
-        obs_v, acts_v, reward_b, reward_m = filter_rollout(batch, PERCENTILE)
+    for iter_no, rolldata in enumerate(rollout(env, net, NEPISODES)):
+        obs_v, acts_v, reward_b, reward_m = filter_rollout(rolldata, PERCENTILE)
         optimizer.zero_grad()
         action_scores_v = net(obs_v)
         loss_v = objective(action_scores_v, acts_v)
@@ -107,5 +107,5 @@ if __name__ == "__main__":
         optimizer.step()
         print("epoch %d: loss=%.3f, reward_mean=%.1f, reward_threshould=%.1f" % (iter_no, loss_v.item(), reward_m, reward_b))
         if reward_m > 199:
-            print("Solved!" % (NEPISODES))
+            print("Solved!")
             break
