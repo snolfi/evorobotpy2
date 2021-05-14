@@ -98,14 +98,14 @@ if __name__ == "__main__":
     optimizer = optim.Adam(params=net.parameters(), lr=0.01) # initialize the Adap stochastic optimizer
     print("")
 
-    for iter_no, rolldata in enumerate(rollout(env, net, NEPISODES)):
+    for epoch, rolldata in enumerate(rollout(env, net, NEPISODES)):
         obs_v, acts_v, reward_b, reward_m = filter_rollout(rolldata, PERCENTILE)
         optimizer.zero_grad()
         action_scores_v = net(obs_v)
         loss_v = objective(action_scores_v, acts_v)
         loss_v.backward()
         optimizer.step()
-        print("epoch %d: loss=%.3f, reward_mean=%.1f, reward_threshould=%.1f" % (iter_no, loss_v.item(), reward_m, reward_b))
+        print("epoch %d: loss=%.3f, reward_mean=%.1f, reward_threshould=%.1f" % (epoch, loss_v.item(), reward_m, reward_b))
         if reward_m > 199:
             print("Solved!")
             break
