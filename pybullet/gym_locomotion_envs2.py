@@ -192,7 +192,7 @@ class Walker2DBulletEnv(WalkerBaseBulletEnv):
       self.robot.apply_action(a)
       self.scene.global_step()
 
-    self.robot.mystep += 1
+    #self.robot.mystep += 1
 
     state = self.robot.calc_state()  # also calculates self.joints_at_limit
 
@@ -390,7 +390,7 @@ class HumanoidBulletEnv(WalkerBaseBulletEnv):
  
     self.HUD(state, a, done)
 
-    print("progress %.2f excess %.2f limit %.2f angle %.2f" % (progress, joints_excess_cost, joints_at_limit_cost, angle_offset_cost))
+    #print("progress %.2f excess %.2f limit %.2f angle %.2f" % (progress, joints_excess_cost, joints_at_limit_cost, angle_offset_cost))
 
     return state, progress + 0.75 + joints_excess_cost + joints_at_limit_cost + angle_offset_cost , bool(done), {"progress" : progress}
 
