@@ -334,7 +334,7 @@ class HumanoidBulletEnv(WalkerBaseBulletEnv):
   def __init__(self, robot=Humanoid(), render=False):
     self.robot = robot
     WalkerBaseBulletEnv.__init__(self, self.robot, render)
-    print("PyBullet Humanoid-v5: reward = progress + 0.75 + (jexcess * -10.0) + (nJLimits * -0.1) + (angleoffset * -0.1): init_range [-0.03,0.03]")
+    print("PyBullet Humanoid-v5: reward = progress + 1.0 + (jexcess * -10.0) + (nJLimits * -0.1) + (angleoffset * -0.1): init_range [-0.03,0.03]")
 
   def step(self, a):
     if not self.scene.multiplayer:  # if multiplayer, action first applied to all robots, then global step() called, then _step() for all robots with the same actions
@@ -392,7 +392,7 @@ class HumanoidBulletEnv(WalkerBaseBulletEnv):
 
     #print("progress %.2f excess %.2f limit %.2f angle %.2f" % (progress, joints_excess_cost, joints_at_limit_cost, angle_offset_cost))
 
-    return state, progress + 0.75 + joints_excess_cost + joints_at_limit_cost + angle_offset_cost , bool(done), {"progress" : progress}
+    return state, progress + 1.0 + joints_excess_cost + joints_at_limit_cost + angle_offset_cost , bool(done), {"progress" : progress}
 
 
 class HumanoidFlagrunBulletEnv(HumanoidBulletEnv):
