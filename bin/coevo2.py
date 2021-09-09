@@ -537,7 +537,43 @@ class Algo(EvoAlgo):
             print(bestrew1)
             print("prey-max: ", end = '')
             print(bestrew2)
-        # "C-file1-file2, cross-experiment (pred and prey of file1 against themselves and against prey and pred of file2
+        # "M-n1-n2, Master tournament, test pop of all generations up to generation n1 against opponent of all generations, every n2 generations 
+        if (parsen[0] == "M"):
+            uptogen = int(parsen[1])
+            everygen = int(parsen[2])
+            ntests = int(uptogen / everygen)
+            popfile = "S%dG%d.npy" % (seed,0)
+            pop = np.load(popfile)
+            popshape = pop.shape
+            popsize = int(popshape[0] / 2)
+            self.policy.test = 0
+            master = np.zeros((ntests, ntests), dtype=np.float64) # matrix with the average performance of every generation against every other generation
+            print("seed %d: postevaluation all generations up to %d against all competitors, every %d generations" % (seed, uptogen, everygen))
+            for p in range(ntests):
+                for pp in range(ntests):
+                    popfile = "S%dG%d.npy" % (seed,p * everygen)
+                    pop = np.load(popfile)
+                    pop2file = "S%dG%d.npy" % (seed,pp * everygen)
+                    pop2 = np.load(pop2file)
+                    tot_rew = 0
+                    max_ind_rew = 0
+                    for i1 in range(popsize):
+                        ind_rew = 0
+                        for i2 in range(popsize):
+                            if (pp == 0):
+                                self.policy.set_trainable_flat(np.concatenate((pop[i1], pop2[popsize+i2])))
+                            else:
+                                self.policy.set_trainable_flat(np.concatenate((pop2[i1], pop[popsize+i2])))                                
+                            rew, eval_length = self.policy.rollout(1)
+                            tot_rew += rew
+                            ind_rew += rew
+                        ind_rew = ind_rew / popsize
+                        if (ind_rew > max_ind_rew):
+                            max_ind_rew = ind_rew
+                    master[p][pp] = tot_rew / float(ntests * ntests)
+            mfile = "masterS%d.npy" % (seed)
+            np.save(mfile, master)            
+        # "C-file1-file2, cross-experiment (pred and prey of file1 against themselves and against prey and pred of file2   
         if (parsen[0] == "c" or parsen[0] == "C"):
             print("crosstest of %s against %s " % (parsen[1], parsen[2]))
             self.policy.test = 0
