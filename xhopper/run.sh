@@ -1,0 +1,10 @@
+nohup python ../bin/es.py -f hopper.ini -s 1 &
+nohup python ../bin/es.py -f hopper.ini -s 2 &
+nohup python ../bin/es.py -f hopper.ini -s 3 &
+nohup python ../bin/es.py -f hopper.ini -s 4 &
+nohup python ../bin/es.py -f hopper.ini -s 5 &
+nohup python ../bin/es.py -f hopper.ini -s 6 &
+nohup python ../bin/es.py -f hopper.ini -s 7 &
+nohup python ../bin/es.py -f hopper.ini -s 8 &
+nohup python ../bin/es.py -f hopper.ini -s 9 &
+nohup python ../bin/es.py -f hopper.ini -s 10 &
